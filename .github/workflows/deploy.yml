@@ -1,38 +1,36 @@
-name: Deploy to GitHub Pages
+name: Deploy automático
 
 on:
   push:
     branches:
-      - main   # ou "master" se for o nome do seu branch principal
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+      - main
+    paths:
+      - '**/*.html'
+      - '**/*.md'
+      - '**/*.txt'
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar Pages
-        uses: actions/configure-pages@v4
-
-      - name: Fazer upload do site
-        uses: actions/upload-pages-artifact@v3
+      - name: Configurar Node (opcional, se usar npm/yarn)
+        uses: actions/setup-node@v4
         with:
-          path: .   # publica o conteúdo da raiz (onde está o index.html)
+          node-version: '20'
 
+      # Exemplo de build (caso precise)
+      - name: Build do projeto
+        run: |
+          echo "Gerando site estático..."
+          # npm run build  # descomente se necessário
+
+      # Exemplo: deploy para GitHub Pages
       - name: Deploy para GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist  # ou ./, dependendo do seu caso
